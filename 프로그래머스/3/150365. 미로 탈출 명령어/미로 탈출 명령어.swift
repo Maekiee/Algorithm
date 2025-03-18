@@ -1,60 +1,87 @@
 import Foundation
 
-func solution(_ n: Int, _ m: Int, _ x: Int, _ y: Int, _ r: Int, _ c: Int, _ k: Int) -> String {
-    // 맨해튼 거리 계산
-    let manhattanDistance = abs(x - r) + abs(y - c)
+// 상태를 정의하는 구조체 (Comparable 채택으로 경로 비교 가능)
+struct State: Comparable {
+    let i: Int      // 현재 행
+    let j: Int      // 현재 열
+    let dist: Int   // 이동 거리
+    let path: String // 이동 경로
     
-    // k가 맨해튼 거리보다 작거나, 차이가 홀수인 경우 불가능
-    if manhattanDistance > k || (k - manhattanDistance) % 2 != 0 {
-        return "impossible"
+    static func < (lhs: State, rhs: State) -> Bool {
+        return lhs.path < rhs.path // 사전 순 비교
+    }
+}
+
+// 우선순위 큐 구현
+struct PriorityQueue<Element: Comparable> {
+    private var elements: [Element] = []
+    
+    var isEmpty: Bool {
+        return elements.isEmpty
     }
     
-    // 사전순으로 방향 정의 (d, l, r, u)
-    let dx = [1, 0, 0, -1]
-    let dy = [0, -1, 1, 0]
-    let directions = ["d", "l", "r", "u"]
+    mutating func enqueue(_ element: Element) {
+        elements.append(element)
+        elements.sort() // 경로 기준 오름차순 정렬
+    }
     
-    var result = ""
+    mutating func dequeue() -> Element? {
+        return isEmpty ? nil : elements.removeFirst()
+    }
+}
+
+// 솔루션 함수
+func solution(_ n: Int, _ m: Int, _ x: Int, _ y: Int, _ r: Int, _ c: Int, _ k: Int) -> String {
+    // 이동 방향: 사전 순으로 d, l, r, u
+    let directions = [(1, 0, "d"), (0, -1, "l"), (0, 1, "r"), (-1, 0, "u")]
+    var queue = PriorityQueue<State>()
+    var visited = Set<String>()
     
-    func dfs(_ currX: Int, _ currY: Int, _ steps: Int, _ path: String) -> Bool {
-        // k 단계를 모두 이동한 경우
-        if steps == k {
-            // 목적지에 도달했는지 확인
-            if currX == r && currY == c {
-                result = path
-                return true
-            }
-            return false
+    // 초기 상태 설정
+    let start = State(i: x, j: y, dist: 0, path: "")
+    queue.enqueue(start)
+    
+    while !queue.isEmpty {
+        guard let current = queue.dequeue() else { break }
+        let (i, j, dist, path) = (current.i, current.j, current.dist, current.path)
+        
+        // 목표 지점에 도달했고, 이동 거리가 k라면 경로 반환
+        if i == r && j == c && dist == k {
+            return path
         }
         
-        // 남은 거리와 단계 계산
-        let remainingDistance = abs(currX - r) + abs(currY - c)
-        let remainingSteps = k - steps
-        
-        // 목적지에 도달 가능한지 검사
-        // 1. 남은 단계가 남은 거리보다 작으면 불가능
-        // 2. 남은 단계와 남은 거리의 차이가 홀수면 불가능
-        if remainingDistance > remainingSteps || (remainingSteps - remainingDistance) % 2 != 0 {
-            return false
+        // 이동 거리가 k를 초과하면 탐색 중단
+        if dist >= k {
+            continue
         }
         
-        // 사전순으로 모든 방향 탐색
-        for i in 0..<4 {
-            let newX = currX + dx[i]
-            let newY = currY + dy[i]
+        // 네 방향으로 이동 시도
+        for (di, dj, move) in directions {
+            let ni = i + di
+            let nj = j + dj
             
-            // 격자 내부인지 확인
-            if newX >= 1 && newX <= n && newY >= 1 && newY <= m {
-                if dfs(newX, newY, steps + 1, path + directions[i]) {
-                    return true
+            // 격자 범위 내에서만 이동 가능
+            if ni >= 1 && ni <= n && nj >= 1 && nj <= m {
+                let newPath = path + move
+                let key = "\(ni),\(nj),\(dist + 1),\(newPath)"
+                
+                // 방문 체크: 동일 상태(위치, 거리, 경로) 중복 방지
+                if !visited.contains(key) {
+                    visited.insert(key)
+                    
+                    // 맨해튼 거리 계산
+                    let manhattan = abs(ni - r) + abs(nj - c)
+                    let remaining = k - dist - 1
+                    
+                    // 남은 거리가 맨해튼 거리 이상이고, 패리티가 맞아야 탐색 계속
+                    if remaining >= manhattan && (remaining - manhattan) % 2 == 0 {
+                        queue.enqueue(State(i: ni, j: nj, dist: dist + 1, path: newPath))
+                    }
                 }
             }
         }
-        
-        return false
     }
     
-    _ = dfs(x, y, 0, "")
-    
-    return result.isEmpty ? "impossible" : result
+    // 탈출 불가능한 경우
+    return "impossible"
 }
