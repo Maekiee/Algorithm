@@ -1,10 +1,23 @@
 import Foundation
 
 func solution(_ num_list:[Int], _ n:Int) -> [[Int]] {
-     return (0..<num_list.count / n).map { row in
-        print(row)
-        let start = row * n
-        let end = start + n
-        return num_list[start..<end].map { $0 }
+    var result: [[Int]] = []
+    var arr: [Int] = []
+    
+    for num in num_list {
+        arr.append(num)
+        
+        if arr.count == n {
+            result.append(arr)
+            arr = []
+        }
+        
     }
+    
+     if !arr.isEmpty {
+         result.append(arr)
+    }
+    
+    return result
+    
 }
