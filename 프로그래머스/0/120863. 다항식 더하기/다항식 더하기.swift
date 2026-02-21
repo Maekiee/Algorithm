@@ -2,29 +2,29 @@ import Foundation
 
 func solution(_ polynomial:String) -> String {
     let arr = polynomial.components(separatedBy: " + ")
-    var coef = 0
-    var num = 0
-    var result = [String]()
+    var result: [String] = []
+    var xCount = 0
+    var numCount = 0 
     
     for item in arr {
         if item == "x" {
-            coef += 1
+            xCount += 1 
         } else if item.count >= 2 && item.contains("x") {
-            let numPart = item.dropLast()
-            coef += Int(numPart)!
+            let num = item.dropLast()
+            xCount += Int(num)!
         } else {
-            num += Int(item)!
+            numCount += Int(item)!
         }
     }
     
-    if coef == 1 {
+    if xCount == 1 {
         result.append("x")
-    } else if coef > 1 {
-        result.append("\(coef)x")
+    } else if xCount > 1 {
+        result.append("\(xCount)x")
     }
     
-    if num != 0 {
-        result.append("\(num)")
+    if numCount != 0 {
+        result.append("\(numCount)")
     }
     
     
