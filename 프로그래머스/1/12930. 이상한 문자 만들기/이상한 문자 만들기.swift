@@ -1,18 +1,16 @@
 func solution(_ s:String) -> String {
-    var count = 0
-    let result = s.map{ String($0) }.map { (wordSub) -> String in
-        let converted = wordSub.enumerated().map { (index, char) -> String in
-            if char != " " {
-                count += 1
-                return count % 2 == 1 ? char.uppercased() : char.lowercased()
-            } else {
-                count = 0
-                return " "
-            }
+    var count = 0 
+    return s.map {
+        var w = String($0)
+        if count % 2 == 0 && w != " " {
+            w = w.uppercased()
+            count += 1
+        } else if count % 2 != 0 && w != " " {
+            w = w.lowercased()
+            count += 1
+        } else if w == " " {
+            count = 0
         }
-        
-        return converted.joined()
+        return w
     }.joined()
-    
-    return result
 }
