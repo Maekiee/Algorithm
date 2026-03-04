@@ -1,9 +1,8 @@
 import Foundation
 
 func solution(_ l:Int, _ r:Int) -> [Int] {
-    let result = (l...r).filter { num in
-        String(num).allSatisfy { $0 == "0" || $0 == "5" }
+    let arr = (l...r).filter {
+        String($0).allSatisfy { $0 == "5" || $0 == "0"}
     }
-    
-    return result.isEmpty ? [-1] : result
+    return arr.isEmpty ? [-1] : arr
 }
