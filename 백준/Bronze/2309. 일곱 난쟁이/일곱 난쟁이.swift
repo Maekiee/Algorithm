@@ -1,27 +1,18 @@
-var a: [Int] = []
-var ret: (Int, Int) = (0, 0)
-
+var arr = [Int]()
 for _ in 0..<9 {
-    let input: Int = Int(readLine()!)!
-    a.append(input)
+    arr.append(Int(readLine()!)!)
 }
 
-var x = a.reduce(0, +) - 100
+let target = arr.reduce(0, +) - 100
 
-for i in 0...7 {
-    for j in i+1...8 {
-        if a[i] + a[j] == x {
-            ret = (a[i], a[j])
-            break
+outer: for i in 0..<9 {
+    for j in (i+1)..<9 {
+        if arr[i] + arr[j] == target {
+            var real = arr
+            real.remove(at: j)
+            real.remove(at: i)
+            real.sorted().forEach { print($0) }
+            break outer
         }
     }
-}
-
-a.remove(at: a.firstIndex(of: ret.0)!)
-a.remove(at: a.firstIndex(of: ret.1)!)
-
-a.sort()
-
-for i in a {
-    print(i)
 }
